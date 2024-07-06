@@ -1,6 +1,7 @@
 package org.musicapp.controller;
 
 import org.musicapp.model.Song;
+import org.musicapp.model.User;
 import org.musicapp.service.SongService;
 
 import java.sql.SQLException;
@@ -9,40 +10,45 @@ import java.util.Scanner;
 
 public class SongController {
     private SongService songService = new SongService();
+    private UserController userController = new UserController();
+
 
     public void manageSongs() {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("1. List Songs");
-            System.out.println("2. Get Song by Title");
-            System.out.println("3. Create Song");
-            System.out.println("4. Update Song Details");
-            System.out.println("5. Delete Song");
-            System.out.println("6. Exit");
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
+            if (!userController.isAuthenticated())
+                userController.login();
+            else{
+                System.out.println("1. List Songs");
+                System.out.println("2. Get Song by Title");
+                System.out.println("3. Create Song");
+                System.out.println("4. Update Song Details");
+                System.out.println("5. Delete Song");
+                System.out.println("6. Exit");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
 
-            switch (choice) {
-                case 1:
-                    listAllSongs();
-                    break;
-                case 2:
-                    searchSongByTitle(scanner);
-                    break;
-                case 3:
-                    addSong(scanner);
-                    break;
-                case 4:
-                    updateSong(scanner);
-                    break;
-                case 5:
-                    deleteASong(scanner);
-                    break;
-                case 6:
-                    return;
+                switch (choice) {
+                    case 1:
+                        listAllSongs();
+                        break;
+                    case 2:
+                        searchSongByTitle(scanner);
+                        break;
+                    case 3:
+                        if (userController.isAdmin()) addSong(scanner);
+                        break;
+                    case 4:
+                        if (userController.isAdmin()) updateSong(scanner);
+                        break;
+                    case 5:
+                        if (userController.isAdmin()) deleteASong(scanner);
+                        break;
+                    case 6:
+                        return;
+                }
             }
-
         }
     }
 
@@ -89,43 +95,43 @@ public class SongController {
         String title = scanner.nextLine();
         try {
             Song song = songService.searchASongByTitle(title);
-            System.out.println(song.toString());
+            if (song != null)
+                System.out.println(song.toString());
+            else
+                System.out.println("Can't find a song in that name..");
         }catch (SQLException e){
-            System.out.println("Can't find a song in that name..");
+            e.printStackTrace();
         }
     }
 
-    public void updateSong(Scanner scanner){
+    public void updateSong(Scanner scanner) {
         scanner.nextLine();
+        Song song = null;
         System.out.print("Enter song title to search: ");
         String title = scanner.nextLine();
-
         try{
-            Song song = songService.searchASongByTitle(title);
-            if(!(song == null)) {
+            song = songService.searchASongByTitle(title);
+            if (!(song == null)) {
                 int songId = song.getSongId(); // Get the Song ID of the song to be updated
-                try {
-                    System.out.print("Enter new Song Title: ");
-                    String newTitle = scanner.nextLine();
-                    System.out.print("Enter new Duration: ");
-                    String duration = scanner.nextLine();
-                    song = new Song(songId, newTitle, duration);
 
-                    boolean isUpdated = songService.updateASong(song);
-                    if (isUpdated)
-                        System.out.println("Song updated successfully");
-                    else
-                        System.out.println("Update Unsuccessful");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                System.out.print("Enter new Song Title: ");
+                String newTitle = scanner.nextLine();
+                System.out.print("Enter new Duration: ");
+                String duration = scanner.nextLine();
+                song = new Song(songId, newTitle, duration);
+
+                boolean isUpdated = songService.updateASong(song);
+                if (isUpdated)
+                    System.out.println("Song updated successfully");
+                else
+                    System.out.println("Update Unsuccessful");
             }
             else
                 System.out.println("Can't find a song in that name..");
         }catch (SQLException e){
             e.printStackTrace();
         }
-        scanner.nextLine();
+
     }
     public void deleteASong(Scanner scanner){
         scanner.nextLine();
