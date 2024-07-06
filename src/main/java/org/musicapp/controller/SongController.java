@@ -58,19 +58,22 @@ public class SongController {
         String title = scanner.nextLine();
         System.out.print("Enter Duration  : ");
         String duration = scanner.nextLine();
+        System.out.print("Enter Artist ID : ");
+        int artistId = scanner.nextInt();
 
-        Song song = new Song(title, duration);
+        Song song = new Song(artistId, title, duration);
 
         try {
             boolean isAdded = songService.addSong(song);
-            if(isAdded)
+            if (isAdded)
                 System.out.println("The song " + "'" + title + "'" + " is successfully added.");
-            else
-                System.out.println("Something went Wrong...");
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e.getSQLState().startsWith("23")) { // SQLState 23 indicates constraint violations
+                System.out.println("Error: Duplicate entry for Song Title and artist ID.");
+            } else {
+                e.printStackTrace();
+            }
         }
-
     }
 
     public void listAllSongs() {

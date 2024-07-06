@@ -1,4 +1,5 @@
 package org.musicapp.dao;
+import org.jetbrains.annotations.NotNull;
 import org.musicapp.model.Song;
 import org.musicapp.util.DBConnection;
 
@@ -10,19 +11,26 @@ public class SongDAO {
     private Connection connection = null;
 
 //    Add a Song to the Database
-    public boolean addSong(@org.jetbrains.annotations.NotNull Song song) throws SQLException {
-        connection = DBConnection.getConnection();
+    public boolean addSong(@NotNull Song song) throws SQLException {
         boolean status = false;
-        String sql = "INSERT INTO songs(songTitle, duration) VALUES(?, ?) ";
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = DBConnection.getConnection();
+            String sql = "INSERT INTO songs(songTitle, duration, artistId) VALUES(?, ?, ?) ";
 
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setString(1, song.getSongTitle());
-        preparedStatement.setString(2, song.getDuration());
-        int rows = preparedStatement.executeUpdate();
-        status = rows>0;
-
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, song.getSongTitle());
+            preparedStatement.setString(2, song.getDuration());
+            preparedStatement.setInt(3, song.getSongId());
+            int rows = preparedStatement.executeUpdate();
+            status = rows > 0;
+        } finally {
+            if (preparedStatement != null) preparedStatement.close();
+            DBConnection.closeConnection(connection);
+        }
         return status;
     }
+
 //    Get All Available Songs from Database
     public List<Song> getAllSongs() throws SQLException {
         connection = DBConnection.getConnection();
