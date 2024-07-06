@@ -11,4 +11,8 @@ public class UserService {
     public User userAuthenticate(String userName, String password) throws SQLException{
         return userDAO.userAuthenticate(userName, password);
     }
+
+    public boolean addUser(User user) throws SQLException{
+        return userDAO.addUser(user);
+    }
 }

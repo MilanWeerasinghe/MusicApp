@@ -1,5 +1,6 @@
 package org.musicapp.dao;
 
+import org.jetbrains.annotations.NotNull;
 import org.musicapp.model.User;
 import org.musicapp.util.DBConnection;
 
@@ -37,5 +38,25 @@ public class UserDAO {
             DBConnection.closeConnection(conn);
         }
         return user;
+    }
+
+    public boolean addUser(@NotNull User user) throws SQLException{
+        boolean status = false;
+        PreparedStatement statement = null;
+        try{
+            conn = DBConnection.getConnection();
+            String sql = "INSERT INTO users(userName, password, role, email) VALUES (?, ?, ?, ?) ";
+            statement = conn.prepareStatement(sql);
+            statement.setString(1,user.getUserName());
+            statement.setString(2,user.getPassword());
+            statement.setString(3,user.getUserRole());
+            statement.setString(4,user.getEmail());
+            int rows = statement.executeUpdate();
+            status = rows>0;
+        }finally {
+            if (statement != null) statement.close();
+            DBConnection.closeConnection(conn);
+        }
+        return status;
     }
 }

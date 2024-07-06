@@ -5,23 +5,34 @@ public class User {
     private String userName;
     private String password;
     private String userRole;
+    private String email;
 
     public User(){}
 
-    public User(int userId, String userName, String password, String userRole){
+    public User(int userId, String userName, String password, String userRole, String email){
         setUserId(userId);
         setUserName(userName);
         setPassword(password);
         setUserRole(userRole);
+        setEmail(email);
     }
-    public User(String userName, String password, String userRole){
+    public User(String userName, String password, String userRole, String email){
         setUserName(userName);
         setPassword(password);
         setUserRole(userRole);
+        setEmail(email);
     }
     public User(String userName, String password){
         setUserName(userName);
         setPassword(password);
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public int getUserId() {

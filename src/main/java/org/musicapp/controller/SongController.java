@@ -69,7 +69,7 @@ public class SongController {
                 System.out.println("The song " + "'" + title + "'" + " is successfully added.");
         } catch (SQLException e) {
             if (e.getSQLState().startsWith("23")) { // SQLState 23 indicates constraint violations
-                System.out.println("Error: Duplicate entry for Song Title and artist ID.");
+                System.out.println("Error: Duplicate record found!");
             } else {
                 e.printStackTrace();
             }
