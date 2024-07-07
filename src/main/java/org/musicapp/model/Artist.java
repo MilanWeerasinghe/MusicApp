@@ -1,17 +1,29 @@
 package org.musicapp.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Artist {
     private int artistId;
-    private String artistName;
+    private String artistFName;
+    private String artistLName;
     private int age;
-    private ArrayList<Song> songs;
+    private List<Song> songs;
 
-    public Artist(String artistName, int age) {
-        this.songs = new ArrayList<Song>();
+    public Artist(){}
+
+    public Artist(String artistFName, String artistLName, int age) {
         setAge(age);
-        setArtistName(artistName);
+        setArtistFName(artistFName);
+        setArtistLName(artistLName);
+    }
+
+    public Artist(int artistId, String artistFName, String artistLName, int age) {
+        setArtistId(artistId);
+        setAge(age);
+        setArtistFName(artistFName);
+        setArtistLName(artistLName);
+        this.songs = new ArrayList<>();
     }
 
     public int getArtistId() {
@@ -22,12 +34,20 @@ public class Artist {
         this.artistId = artistId;
     }
 
-    public String getArtistName() {
-        return artistName;
+    public String getArtistFName() {
+        return artistFName;
     }
 
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
+    public String getArtistLName() {
+        return artistLName;
+    }
+
+    public void setArtistFName(String artistFName) {
+        this.artistFName = artistFName;
+    }
+
+    public void setArtistLName(String artistLName) {
+        this.artistLName = artistLName;
     }
 
     public int getAge() {
@@ -38,21 +58,27 @@ public class Artist {
         this.age = age;
     }
 
-    public ArrayList<Song> getSongs() {
+    public List<Song> getSongs() {
         return songs;
     }
 
-    public void setSongs(ArrayList<Song> songs) {
+    public void setSongs(List<Song> songs) {
         this.songs = songs;
     }
 
+    public void addSong(Song song) {
+        this.songs.add(song);
+    }
+
+    public void removeSong(Song song) {
+        this.songs.remove(song);
+    }
     @Override
     public String toString() {
-        return "Artist{" +
-                "artistId=" + artistId +
-                ", artistName='" + artistName + '\'' +
-                ", age=" + age +
-                ", songs=" + songs +
-                '}';
+        return  "Artist ID : " + artistId + "\n" +
+                "First Name: " + artistFName + "\n" +
+                "Last Name : " + artistLName + "\n" +
+                "Age       : " + age + "\n"
+                ;
     }
 }

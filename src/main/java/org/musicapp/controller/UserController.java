@@ -11,7 +11,33 @@ public class UserController {
     private UserService userService = new UserService();
     private User currentUser = null;
 
-    public void login(){
+    public void manageUsers(){
+        Scanner scanner = new Scanner(System.in);
+
+        while(true) {
+            System.out.println("1. Add User");
+            System.out.println("2. Get User Details");
+            System.out.println("3. Update User Details");
+            System.out.println("4. Delete User");
+            System.out.println("5. Exit");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    addUser(scanner);
+                    break;
+                case 2:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    return;
+            }
+        }
+    }
+    public boolean login(){
+        boolean status = false;
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter UserName: ");
@@ -24,17 +50,17 @@ public class UserController {
             if (currentUser != null) {
                 System.out.println("Login Successful... Welcome " + currentUser.getUserName());
                 System.out.println("----------------------------------------");
+                status = true;
             }
             else
                 System.out.println("Login Unsuccessful");
         }catch (SQLException e){
             e.printStackTrace();
         }
-        scanner.close();
-    }
-    public void addUser(){
-        Scanner scanner = new Scanner(System.in);
+        return status;
 
+    }
+    public void addUser(Scanner scanner){
         System.out.print("Enter User name: ");
         String userName = scanner.nextLine();
         System.out.print("Enter Password : ");
