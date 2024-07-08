@@ -4,6 +4,8 @@ import org.musicapp.model.User;
 import org.musicapp.service.UserService;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 @SuppressWarnings("ALL")
@@ -25,11 +27,16 @@ public class UserController {
 
             switch (choice) {
                 case 1:
-                    addUser(scanner);
+                    if(isAdmin()) addUser(scanner);
                     break;
                 case 2:
+                    getAllUsers();
+                    break;
+                case 3:
+                    if(isAdmin()) updateUser(scanner);
                     break;
                 case 4:
+                    if(isAdmin()) deleteUser(scanner);
                     break;
                 case 5:
                     return;
@@ -61,6 +68,7 @@ public class UserController {
 
     }
     public void addUser(Scanner scanner){
+        scanner.nextLine();
         System.out.print("Enter User name: ");
         String userName = scanner.nextLine();
         System.out.print("Enter Password : ");
@@ -83,6 +91,79 @@ public class UserController {
                 e.printStackTrace();
             }
         }
+    }
+    public void getAllUsers(){
+        List<User> users = new ArrayList<>();
+        try {
+            users = userService.getAllUsers();
+            for(User user : users){
+                if (user != null) {
+                    System.out.println(user.toString());
+                    System.out.println("---------------------");
+                } else {
+                    System.out.println("User not found");
+                }
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+    public int searchUser(Scanner scanner){
+        scanner.nextLine();
+        System.out.print("Enter username: ");
+        String userName = scanner.nextLine();
+
+        int userId = -1;
+        try {
+            userId = userService.searchUser(userName);
+            if(userId != -1)
+                System.out.println("User Found");
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return userId;
+    }
+    public void updateUser(Scanner scanner){
+        int userId = searchUser(scanner);
+        if(userId != -1){
+            try{
+                System.out.println("Enter New User Details");
+                System.out.print("userName: ");
+                String username = scanner.nextLine();
+                System.out.print("Password: ");
+                String password = scanner.nextLine();
+                System.out.print("user Role: ");
+                String userRole = scanner.nextLine();
+                System.out.print("Email   : ");
+                String email = scanner.nextLine();
+                User user = new User(userId, username, password, userRole, email);
+                boolean isUpdated = userService.updateUser(user);
+                if (isUpdated)
+                    System.out.println("Successfully Deleted.");
+                else
+                    System.out.println("Something went wrong!");
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+        else
+            System.out.println("User Not Found!");
+    }
+    public void deleteUser(Scanner scanner){
+        int userId = searchUser(scanner);
+        if(userId != -1){
+            try{
+                boolean isDeleted = userService.deleteUser(userId);
+                if (isDeleted)
+                    System.out.println("Successfully Deleted.");
+                else
+                    System.out.println("Something went wrong!");
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+        else
+            System.out.println("User Not Found!");
     }
     public boolean isAdmin(){
         boolean status = currentUser != null && currentUser.getUserRole().equals("admin");

@@ -35,6 +35,46 @@ public class ArtistDAO {
         }
         return status;
     }
+//    Search artist by title and return Artist ID
+    public int searchArtist(String fName, String lName) throws SQLException{
+        int artistId = -1;
+        PreparedStatement statement = null;
+        try{
+            conn = DBConnection.getConnection();
+            String sql = "SELECT artistId FROM artist WHERE fName = ? AND lName = ? ";
+            statement = conn.prepareStatement(sql);
+            statement.setString(1,fName);
+            statement.setString(2,lName);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()){
+                artistId = resultSet.getInt("artistId");
+            }
+        }finally {
+            if(statement!= null) statement.close();
+            DBConnection.closeConnection(conn);
+        }
+        return artistId;
+    }
+//    Update artist details in Database
+    public boolean updateArtist(int id, String fName, String lName) throws SQLException{
+        boolean status = false;
+        PreparedStatement statement = null;
+        try{
+            conn = DBConnection.getConnection();
+            String sql = "UPDATE artist SET fName = ? , lName = ? WHERE artistId = ?";
+            statement = conn.prepareStatement(sql);
+            statement.setString(1,fName);
+            statement.setString(2,lName);
+            statement.setInt(3,id);
+            int rows = statement.executeUpdate();
+            status = rows>0;
+        }finally {
+            if(statement!=null) statement.close();
+            DBConnection.closeConnection(conn);
+        }
+        return status;
+    }
 //    Get the artist's details with Songs
     public List<Artist> getAllArtist() throws SQLException{
         Map<Long, Artist> artistMap = new HashMap<>();
@@ -71,15 +111,14 @@ public class ArtistDAO {
         }
     }
 
-    public boolean deleteArtist(String fName ,String lName) throws SQLException{
+    public boolean deleteArtist(int artistId) throws SQLException{
         boolean status = false;
         PreparedStatement statement = null;
         try{
             conn = DBConnection.getConnection();
-            String sql = "DELETE FROM artist WHERE fName = ? AND lName= ?";
+            String sql = "DELETE FROM artist WHERE artistId = ?";
             statement = conn.prepareStatement(sql);
-            statement.setString(1,fName);
-            statement.setString(2,lName);
+            statement.setInt(1,artistId);
             int rows = statement.executeUpdate();
             status = rows>0;
         }finally {

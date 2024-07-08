@@ -17,7 +17,13 @@ public class ArtistService {
         return artistDAO.getAllArtist();
     }
 
-    public boolean deleteArtist(String fName, String lName) throws SQLException{
-        return artistDAO.deleteArtist(fName, lName);
+    public boolean deleteArtist(int artistId) throws SQLException{
+        return artistDAO.deleteArtist(artistId);
+    }
+    public boolean updateArtist(int id,String fName, String lName) throws SQLException{
+        return artistDAO.updateArtist(id, fName, lName);
+    }
+    public int searchArtist(String fName, String lName) throws SQLException{
+        return artistDAO.searchArtist(fName, lName);
     }
 }

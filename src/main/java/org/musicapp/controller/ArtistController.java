@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 public class ArtistController {
     private ArtistService artistService = new ArtistService();
+    private UserController currentUser = new UserController();
 
     public void manageArtist(){
         Scanner scanner = new Scanner(System.in);
@@ -26,13 +27,16 @@ public class ArtistController {
 
             switch (choice) {
                 case 1:
-                    addArtist(scanner);
+                    if(currentUser.isAdmin()) addArtist(scanner);
                     break;
                 case 2:
                     getAllArtist();
                     break;
+                case 3:
+                    if(currentUser.isAdmin()) updateArtist(scanner);
+                    break;
                 case 4:
-                    deleteArtist(scanner);
+                    if(currentUser.isAdmin()) deleteArtist(scanner);
                     break;
                 case 5:
                     return;
@@ -84,32 +88,56 @@ public class ArtistController {
         }
     }
 
-    public void deleteArtist(Scanner scanner){
+    public int searchArtist(Scanner scanner){
         scanner.nextLine();
-        String firstName = null;
-        String lastName = null;
-        System.out.print("Enter Artist first name and last name to delete: ");
-        String artistName = scanner.nextLine();
-        // Split the string by space and assign to variables
-        String[] parts = artistName.split("\\s+", 2); // Limit to 2 parts
-
-        // Check if the input contains at least two parts
-        if (parts.length >= 1) {
-            firstName = parts[0];
-//            lastName = parts[1];
-        }
-        System.out.println(firstName);
-        System.out.println(lastName);
-
-        try {
-            boolean isDeleted = artistService.deleteArtist(firstName, lastName);
-            if(isDeleted)
-                System.out.println("Artist Successfully Deleted.");
-            else
-                System.out.println("Something went Wrong!");
+        int artistId = -1;
+        System.out.println("Enter Artist Name to search");
+        System.out.print("First name: ");
+        String fName = scanner.nextLine();
+        System.out.print("Last name : ");
+        String lName = scanner.nextLine();
+        try{
+             artistId= artistService.searchArtist(fName, lName);
+            if (artistId != -1)
+                System.out.println("Artist Found!");
         }catch (SQLException e){
             e.printStackTrace();
         }
+        return artistId;
+    }
+    public void updateArtist(Scanner scanner){
+        int artistId = searchArtist(scanner);
+
+        if(artistId !=-1) {
+            System.out.println("Enter New Artist Name");
+            System.out.print("First Name: ");
+            String fName = scanner.nextLine();
+            System.out.print("Last Name : ");
+            String lName = scanner.nextLine();
+            try {
+                boolean isUpdated = artistService.updateArtist(artistId, fName, lName);
+                if (isUpdated)
+                    System.out.println("Successfully updated.");
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }else
+            System.out.println("Artist Not Found! ");
+    }
+    public void deleteArtist(Scanner scanner){
+        int artistId = searchArtist(scanner);
+        if(artistId != -1) {
+            try {
+                boolean isDeleted = artistService.deleteArtist(artistId);
+                if (isDeleted)
+                    System.out.println("Successfully Deleted.");
+                else
+                    System.out.println("Something went Wrong!");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }else
+            System.out.println("Artist Not Found! ");
     }
 
 
