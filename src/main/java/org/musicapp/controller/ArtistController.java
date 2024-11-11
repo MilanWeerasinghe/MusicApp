@@ -3,50 +3,56 @@ package org.musicapp.controller;
 import org.musicapp.model.Artist;
 import org.musicapp.model.Song;
 import org.musicapp.service.ArtistService;
+import org.musicapp.service.SongService;
+import org.musicapp.util.UserAuth;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ArtistController {
     private ArtistService artistService = new ArtistService();
-    private UserController currentUser = new UserController();
+    private SongService songService = new SongService();
+    private UserAuth userAuth = new UserAuth();
 
-    public void manageArtist(){
+    public void manageArtist() throws SQLException {
         Scanner scanner = new Scanner(System.in);
 
-        while(true) {
+        while (true) {
             System.out.println("1. Add Artist");
-            System.out.println("2. Get Artists");
-            System.out.println("3. Update Artist");
-            System.out.println("4. Delete Artist");
-            System.out.println("5. Exit");
+            System.out.println("2. Get All Artists");
+            System.out.println("3. Get Artist");
+            System.out.println("4. Update Artist");
+            System.out.println("5. Delete Artist");
+            System.out.println("6. Exit");
 
             int choice = scanner.nextInt();
 
             switch (choice) {
                 case 1:
-                    if(currentUser.isAdmin()) addArtist(scanner);
+                    if(userAuth.isAdmin()) addArtist(scanner);
                     break;
                 case 2:
                     getAllArtist();
                     break;
                 case 3:
-                    if(currentUser.isAdmin()) updateArtist(scanner);
+                    getArtist(scanner);
                     break;
                 case 4:
-                    if(currentUser.isAdmin()) deleteArtist(scanner);
+                    if(userAuth.isAdmin()) updateArtist(scanner);
                     break;
                 case 5:
+                    if(userAuth.isAdmin()) deleteArtist(scanner);
+                    break;
+                case 6:
                     return;
             }
         }
     }
 
-    public void addArtist(Scanner scanner){
+    public void addArtist(Scanner scanner) throws SQLException {
         scanner.nextLine();
-        Artist artist = null;
+
         System.out.print("Enter Artist First Name: ");
         String userFName = scanner.nextLine();
         System.out.print("Enter Artist Last Name : ");
@@ -54,93 +60,71 @@ public class ArtistController {
         System.out.print("Enter Artist Age : ");
         int age = scanner.nextInt();
 
-        try{
-            artist = new Artist(userFName, userLName, age);
-            boolean isAdded = artistService.addArtist(artist);
-            if(isAdded)
-                System.out.println("Artist Added Successfully.");
-            else{
-                System.out.println("Something went wrong!");
-            }
-        }catch (SQLException e){
-            if (e.getSQLState().startsWith("23")) { // SQLState 23 indicates constraint violations
-                System.out.println("Error: Duplicate record found!");
-            } else {
-                e.printStackTrace();
-            }
-        }
+        Artist artist = new Artist(userFName, userLName, age);
+        artistService.addArtist(artist);
+
+
     }
 
-    public void getAllArtist(){
-        List<Artist> artists = null;
-        try{
-            artists = artistService.getAllArtist();
-            for(Artist artist : artists){
-                int count = 0;
-                System.out.print(artist.toString());
-                for(Song song : artist.getSongs()){
-                    System.out.println("Song " + ++count + " Name : " + song.getSongTitle());
-                }
-                System.out.println("-------------------------");
-            }
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
+    public void getAllArtist() throws SQLException {
+        List<Artist> artists;
+        artists = artistService.getAllArtist();
+        artists.forEach(artist -> System.out.println(
+                artist.toString()+ "\n" + "---------------------"
+        ));
     }
 
-    public int searchArtist(Scanner scanner){
+    public void getArtist(Scanner scanner) throws SQLException {
         scanner.nextLine();
-        int artistId = -1;
-        System.out.println("Enter Artist Name to search");
-        System.out.print("First name: ");
-        String fName = scanner.nextLine();
-        System.out.print("Last name : ");
-        String lName = scanner.nextLine();
-        try{
-             artistId= artistService.searchArtist(fName, lName);
-            if (artistId != -1)
-                System.out.println("Artist Found!");
-        }catch (SQLException e){
-            e.printStackTrace();
+        System.out.print("Artist id: ");
+        int id = scanner.nextInt();
+        Artist artist = artistService.searchArtist(id);
+        List<Song> songs = songService.searchASongByArtistId(id);
+
+        if(artist != null) {
+            System.out.println(artist);
+        }else System.out.println("not found");
+
+        if (songs.isEmpty()) {
+            System.out.println("No songs found for this artist.");
+        } else {
+            System.out.println("Songs:");
+            for (Song song : songs) {
+                System.out.println(song.toString());
+            }
         }
-        return artistId;
-    }
-    public void updateArtist(Scanner scanner){
-        int artistId = searchArtist(scanner);
-
-        if(artistId !=-1) {
-            System.out.println("Enter New Artist Name");
-            System.out.print("First Name: ");
-            String fName = scanner.nextLine();
-            System.out.print("Last Name : ");
-            String lName = scanner.nextLine();
-            try {
-                boolean isUpdated = artistService.updateArtist(artistId, fName, lName);
-                if (isUpdated)
-                    System.out.println("Successfully updated.");
-            }catch (SQLException e){
-                e.printStackTrace();
-            }
-        }else
-            System.out.println("Artist Not Found! ");
-    }
-    public void deleteArtist(Scanner scanner){
-        int artistId = searchArtist(scanner);
-        if(artistId != -1) {
-            try {
-                boolean isDeleted = artistService.deleteArtist(artistId);
-                if (isDeleted)
-                    System.out.println("Successfully Deleted.");
-                else
-                    System.out.println("Something went Wrong!");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }else
-            System.out.println("Artist Not Found! ");
     }
 
+    public Artist searchArtist(Scanner scanner) throws SQLException {
+        scanner.nextLine();
+        System.out.print("Artist id: ");
+        int id = scanner.nextInt();
 
+        return artistService.searchArtist(id);
+    }
 
+    public void updateArtist(Scanner scanner) throws SQLException {
+        scanner.nextLine();
+        System.out.print("Artist id: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Enter New Artist Name");
+        System.out.print("First Name: ");
+        String fName = scanner.nextLine();
+        System.out.print("Last Name : ");
+        String lName = scanner.nextLine();
+        System.out.print("Age : ");
+        int age = scanner.nextInt();
 
+        artistService.updateArtist(new Artist(id, fName, lName, age));
+
+    }
+
+    public void deleteArtist(Scanner scanner) throws SQLException {
+        scanner.nextLine();
+        System.out.print("Artist id: ");
+        int id = scanner.nextInt();
+        artistService.deleteArtist(id);
+    }
 }
+

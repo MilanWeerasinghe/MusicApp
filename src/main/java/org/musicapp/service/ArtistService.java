@@ -9,21 +9,22 @@ import java.util.List;
 public class ArtistService {
     private ArtistDAO artistDAO = new ArtistDAO();
 
-    public boolean addArtist(Artist artist) throws SQLException{
-        return artistDAO.addArtist(artist);
+    public void addArtist(Artist artist) throws SQLException {
+        artistDAO.addArtist(artist);
     }
 
-    public List<Artist> getAllArtist() throws SQLException{
-        return artistDAO.getAllArtist();
+    public List<Artist> getAllArtist() throws SQLException {
+        return artistDAO.getArtistList();
     }
 
-    public boolean deleteArtist(int artistId) throws SQLException{
-        return artistDAO.deleteArtist(artistId);
+    public void deleteArtist(int artistId) throws SQLException {
+        artistDAO.removeArtist(artistId);
     }
-    public boolean updateArtist(int id,String fName, String lName) throws SQLException{
-        return artistDAO.updateArtist(id, fName, lName);
+
+    public void updateArtist(Artist artist) throws SQLException {
+        artistDAO.updateArtist(artist);
     }
-    public int searchArtist(String fName, String lName) throws SQLException{
-        return artistDAO.searchArtist(fName, lName);
+    public Artist searchArtist(int id) throws SQLException {
+        return artistDAO.getArtist(id);
     }
 }

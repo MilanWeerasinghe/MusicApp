@@ -1,5 +1,4 @@
 package org.musicapp.dao;
-import org.jetbrains.annotations.NotNull;
 import org.musicapp.model.Song;
 import org.musicapp.util.DBConnection;
 
@@ -8,94 +7,103 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SongDAO {
-    private Connection connection = null;
 
 //    Add a Song to the Database
-    public boolean addSong(@NotNull Song song) throws SQLException {
-        boolean status = false;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = DBConnection.getConnection();
-            String sql = "INSERT INTO songs(songTitle, duration, artistId) VALUES(?, ?, ?) ";
-
-            preparedStatement = connection.prepareStatement(sql);
+    public void addSong(Song song) throws SQLException {
+        String sql = "INSERT INTO song(songTitle, duration, albumId, artistId) VALUES(?, ?, ?, ?) ";
+        try (Connection connection = DBConnection.getInstance().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, song.getSongTitle());
             preparedStatement.setString(2, song.getDuration());
-            preparedStatement.setInt(3, song.getSongId());
-            int rows = preparedStatement.executeUpdate();
-            status = rows > 0;
-        } finally {
-            if (preparedStatement != null) preparedStatement.close();
-            DBConnection.closeConnection(connection);
+            preparedStatement.setInt(3, song.getAlbumId());
+            preparedStatement.setInt(4, song.getArtistId());
+            preparedStatement.executeUpdate();
         }
-        return status;
     }
 
 //    Get All Available Songs from Database
     public List<Song> getAllSongs() throws SQLException {
-        connection = DBConnection.getConnection();
         List<Song> songs = new ArrayList<>();
-        String sql = "SELECT * FROM songs";
 
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT * FROM song";
+        try (Connection connection = DBConnection.getInstance().getConnection();
+            Statement statement=connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql)){
 
-        while(resultSet.next()){
-            Song song = new Song();
-            song.setSongId(resultSet.getInt("songId"));
-            song.setSongTitle(resultSet.getString("songTitle"));
-            song.setDuration(resultSet.getString("duration"));
+        while (resultSet.next()) {
+            Song song = new Song(
+                    resultSet.getInt("songId"),
+                    resultSet.getInt("artistId"),
+                    resultSet.getInt("albumId"),
+                    resultSet.getString("songTitle"),
+                    resultSet.getString("duration"));
             songs.add(song);
         }
         return songs;
+        }
     }
 
 //    Get a Song By Title
     public Song searchASongByTitle(String title) throws SQLException{
-        connection = DBConnection.getConnection();
-        Song song = null;
-        String sql = "SELECT * FROM songs WHERE songTitle = ?";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1,title);
+        String sql = "SELECT * FROM song WHERE songTitle = ?";
+        try(Connection connection = DBConnection.getInstance().getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql)){
+            statement.setString(1,title);
+            ResultSet resultSet = statement.executeQuery();
 
-        ResultSet resultSet = statement.executeQuery();
-        if (resultSet.next()){
-            song = new Song();
-            song.setSongId(resultSet.getInt("songId"));
-            song.setSongTitle(resultSet.getString("songTitle"));
-            song.setDuration(resultSet.getString("duration"));
+            if (resultSet.next()){
+                Song song = new Song(
+                        resultSet.getInt("songId"),
+                        resultSet.getInt("artistId"),
+                        resultSet.getInt("albumId"),
+                        resultSet.getString("songTitle"),
+                        resultSet.getString("duration"));
+                return song;
+            }
         }
-        return song;
+        return null;
+    }
+
+    public List<Song> searchASongByArtistId(int artistId) throws SQLException{
+        List<Song> songList = new ArrayList<>();
+        String sql = "SELECT * FROM Song WHERE artistId = ?";
+        try (Connection connection = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)){
+             statement.setInt(1, artistId);
+             ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Song song = new Song(
+                        resultSet.getInt("songId"),
+                        resultSet.getInt("artistId"),
+                        resultSet.getInt("albumId"),
+                        resultSet.getString("songTitle"),
+                        resultSet.getString("duration"));
+                songList.add(song);
+            }
+            return songList;
+        }
     }
 
 //    Update a Song Details in Database
-    public boolean updateASong(Song song) throws SQLException{
-        connection = DBConnection.getConnection();
-        boolean status = false;
-
-        String sql = "UPDATE songs SET songTitle= ?, duration = ? WHERE songId= ? ";
-        try(PreparedStatement statement = connection.prepareStatement(sql)){
+    public void updateASong(Song song) throws SQLException{
+        String sql = "UPDATE song SET songTitle= ?, duration = ? WHERE songId= ? ";
+        try(Connection connection = DBConnection.getInstance().getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setString(1, song.getSongTitle());
             statement.setString(2,song.getDuration());
             statement.setInt(3,song.getSongId());
-            int rows = statement.executeUpdate();
-
-            status = rows>0;
-
+            statement.executeUpdate();
         }
-        return status;
     }
 
 //    Delete a Song From Database
-    public boolean deleteASong(String title) throws SQLException{
-        connection = DBConnection.getConnection();
-        boolean status = false;
-        String sql = "DELETE FROM songs WHERE songTitle = ? ";
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, title);
-            int rows = preparedStatement.executeUpdate();
-            status = rows>0;
+    public void deleteASong(int sondId) throws SQLException{
+        String sql = "DELETE FROM song WHERE songId = ? ";
+        try(Connection connection = DBConnection.getInstance().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, sondId);
+            preparedStatement.executeUpdate();
         }
-        return status;
     }
 }

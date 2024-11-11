@@ -2,56 +2,51 @@ package org.musicapp.model;
 
 public class Song  {
     private int songId;
+    private int artistId;
+    private int albumId;
     private String songTitle;
-    private Artist artist;
     private String duration;
-    private Album album;
 
+    public Song(int artistId, int albumId, String songTitle, String duration) {
+        this.artistId = artistId;
+        this.albumId = albumId;
+        this.songTitle = songTitle;
+        this.duration = duration;
+    }
+
+    public Song(int songId, int artistId, int albumId, String songTitle, String duration) {
+        this.songId = songId;
+        this.artistId = artistId;
+        this.albumId = albumId;
+        this.songTitle = songTitle;
+        this.duration = duration;
+    }
 
     public Song(){}
 
-    public Song(int id, String songTitle, String duration){
-        setSongTitle(songTitle);
-        setDuration(duration);
-        setSongId(id);
-    }
-
-    public Song(String songTitle, String duration){
-        setSongTitle(songTitle);
-        setDuration(duration);
-    }
 
     public int getSongId() {
         return songId;
-    }
-
-    public void setSongId(int songId) {
-        this.songId = songId;
     }
 
     public String getSongTitle() {
         return songTitle;
     }
 
-    public void setSongTitle(String songTitle) {
-        this.songTitle = songTitle;
-    }
+    public String getDuration() {return duration;}
 
-    public Artist getArtist() {
-        return artist;
-    }
+    public int getArtistId() {return artistId;}
 
-    public void setArtist(Artist artist) {
-        this.artist = artist;
-    }
+    public int getAlbumId() {return albumId;}
 
-    public String getDuration() {
-        return duration;
-    }
 
     public void setDuration(String duration) {
         this.duration = duration;
     }
+    public void setSongTitle(String songTitle) {
+        this.songTitle = songTitle;
+    }
+
 
     @Override
     public String toString() {

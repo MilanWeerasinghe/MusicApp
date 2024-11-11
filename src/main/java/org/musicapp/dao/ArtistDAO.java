@@ -11,121 +11,84 @@ import java.util.List;
 import java.util.Map;
 
 public class ArtistDAO {
-    private Connection conn= null;
 
-//    ADD artist to the Database
-    public boolean addArtist(Artist artist) throws SQLException {
-        PreparedStatement preparedStatement = null;
-        boolean status= false;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "insert into artist(fName, lName, age) values(?, ?, ?) ";
+    public List<Artist> getArtistList() throws SQLException{
+        List<Artist> artistList = new ArrayList<>();
+        String sql = "SELECT * FROM artist";
 
-            preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setString(1,artist.getArtistFName());
-            preparedStatement.setString(2,artist.getArtistLName());
-            preparedStatement.setInt(3,artist.getAge());
-            int rows = preparedStatement.executeUpdate();
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)){
 
-            status = rows>0;
+            while (resultSet.next()) {
+                Artist artist =  new Artist(
+                        resultSet.getInt("artistId"),
+                        resultSet.getString("fName"),
+                        resultSet.getString("lName"),
+                        resultSet.getInt("age"));
 
-        }finally {
-            if (preparedStatement != null) preparedStatement.close();
-            DBConnection.closeConnection(conn);
+                artistList.add(artist);
+            }
+            return artistList;
         }
-        return status;
+
     }
-//    Search artist by title and return Artist ID
-    public int searchArtist(String fName, String lName) throws SQLException{
-        int artistId = -1;
-        PreparedStatement statement = null;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "SELECT artistId FROM artist WHERE fName = ? AND lName = ? ";
-            statement = conn.prepareStatement(sql);
-            statement.setString(1,fName);
-            statement.setString(2,lName);
+
+
+    public Artist getArtist(int id) throws SQLException{
+        String sql = "SELECT * from artist WHERE artistId = ? ";
+
+        try(Connection conn = DBConnection.getInstance().getConnection();
+            PreparedStatement statement = conn.prepareStatement(sql)){
+
+            statement.setInt(1,id);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()){
-                artistId = resultSet.getInt("artistId");
+                return new Artist(
+                        resultSet.getInt("artistId"),
+                        resultSet.getString("fName"),
+                        resultSet.getString("lName"),
+                        resultSet.getInt("age")
+                );
             }
-        }finally {
-            if(statement!= null) statement.close();
-            DBConnection.closeConnection(conn);
         }
-        return artistId;
+        return null;
     }
-//    Update artist details in Database
-    public boolean updateArtist(int id, String fName, String lName) throws SQLException{
-        boolean status = false;
-        PreparedStatement statement = null;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "UPDATE artist SET fName = ? , lName = ? WHERE artistId = ?";
-            statement = conn.prepareStatement(sql);
-            statement.setString(1,fName);
-            statement.setString(2,lName);
-            statement.setInt(3,id);
-            int rows = statement.executeUpdate();
-            status = rows>0;
-        }finally {
-            if(statement!=null) statement.close();
-            DBConnection.closeConnection(conn);
-        }
-        return status;
-    }
-//    Get the artist's details with Songs
-    public List<Artist> getAllArtist() throws SQLException{
-        Map<Long, Artist> artistMap = new HashMap<>();
 
-        Statement statement = null;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = " SELECT artist.artistId,artist.fName, artist.Lname, artist.age, " +
-                    "songs.songTitle, songs.songId, songs.duration " +
-                    "FROM artist LEFT JOIN songs ON artist.artistId = songs.artistId;";
-            statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+    public void addArtist(Artist artist) throws SQLException {
+        String sql = "insert into artist(fName, lName, age) values(?, ?, ?) ";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
 
-            while(resultSet.next()){
-                long artistId = resultSet.getInt("artistId");
-                String fName = resultSet.getString("fName");
-                String lName = resultSet.getString("lName");
-                int age = resultSet.getInt("age");
-                // Create a Song object to get the data from DB
-                Song song = new Song();
-                song.setSongId(resultSet.getInt("songId"));
-                song.setSongTitle(resultSet.getString("songTitle"));
-                song.setDuration(resultSet.getString("duration"));
-
-                // Create or retrieve the artist
-                Artist artist = artistMap.computeIfAbsent(artistId, id -> new Artist((int) artistId,fName,lName,age));
-                // Add song to the artist's list
-                artist.addSong(song);
-            }
-            return new ArrayList<>(artistMap.values());
-        }finally {
-            if (statement != null) statement.close();
-            DBConnection.closeConnection(conn);
+            preparedStatement.setString(1, artist.getArtistFName());
+            preparedStatement.setString(2, artist.getArtistLName());
+            preparedStatement.setInt(3, artist.getAge());
+            preparedStatement.executeUpdate();
         }
     }
 
-    public boolean deleteArtist(int artistId) throws SQLException{
-        boolean status = false;
-        PreparedStatement statement = null;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "DELETE FROM artist WHERE artistId = ?";
-            statement = conn.prepareStatement(sql);
-            statement.setInt(1,artistId);
-            int rows = statement.executeUpdate();
-            status = rows>0;
-        }finally {
-            if(statement != null) statement.close();
-            DBConnection.closeConnection(conn);
+    public void removeArtist(int artistId) throws SQLException {
+        String sql = "DELETE FROM artist WHERE artistId = ?";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql)) {
+
+            statement.setInt(1, artistId);
+            statement.executeUpdate();
         }
-        return status;
+    }
+
+    public void updateArtist(Artist artist) throws SQLException {
+        String sql = "UPDATE artist SET fName = ? ,lName = ? ,age=? WHERE artistId = ?";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql)) {
+
+            statement.setString(1, artist.getArtistFName());
+            statement.setString(2, artist.getArtistLName());
+            statement.setInt(3, artist.getAge());
+            statement.setInt(4, artist.getArtistId());
+            statement.executeUpdate();
+        }
     }
 
 

@@ -9,27 +9,27 @@ import java.util.List;
 public class UserService {
     private UserDAO userDAO = new UserDAO();
 
-    public User userAuthenticate(String userName, String password) throws SQLException{
-        return userDAO.userAuthenticate(userName, password);
+    public User userAuthenticate(User user) throws SQLException{
+        return userDAO.userAuthenticate(user);
     }
 
-    public boolean addUser(User user) throws SQLException{
-        return userDAO.addUser(user);
+    public void addUser(User user) throws SQLException{
+        userDAO.addUser(user);
     }
 
-    public boolean deleteUser(int id) throws SQLException{
-        return userDAO.deleteUser(id);
+    public void deleteUser(int id) throws SQLException{
+        userDAO.deleteUser(id);
     }
 
-    public int searchUser(String userName) throws SQLException{
-        return userDAO.searchUser(userName);
+    public User getUserByUsername(String userName) throws SQLException{
+        return userDAO.getUserByUsername(userName);
     }
 
     public List<User> getAllUsers() throws SQLException{
         return userDAO.getAllUsers();
     }
 
-    public boolean updateUser(User user) throws SQLException{
-        return userDAO.updateUser(user);
+    public void updateUser(User user) throws SQLException{
+        userDAO.updateUser(user);
     }
 }
