@@ -9,143 +9,97 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
-    private Connection conn = null;
 
-//    User authentication
-    public User userAuthenticate(String userName, String password) throws SQLException{
-        PreparedStatement statement = null;
-        User user = null;
-        ResultSet resultSet = null;
+    public User userAuthenticate(User user) throws SQLException{
+        String sql = "SELECT * FROM user WHERE userName= ? AND password= ? ";
+        try( Connection conn = DBConnection.getInstance().getConnection();
+            PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setString(1, user.getUsername());
+            statement.setString(2, user.getPassword());
+            ResultSet resultSet = statement.executeQuery();
 
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "SELECT * FROM users WHERE userName= ? AND password= ? ";
-            statement = conn.prepareStatement(sql);
-            statement.setString(1,userName);
-            statement.setString(2,password);
+            if (resultSet.next()) {
+                User newUser = new User(
+                        resultSet.getInt("userId"),
+                        resultSet.getString("username"),
+                        resultSet.getString("userRole"));
 
-            resultSet = statement.executeQuery();
-            if(resultSet.next()) {
-                user = new User();
-                user.setUserId(resultSet.getInt(1));
-                user.setUserName(resultSet.getString(2));
-                user.setPassword(resultSet.getString(3));
-                user.setUserRole(resultSet.getString(4));
+                return newUser;
             }
-        }finally {
-            if (resultSet != null) resultSet.close();
-            if (statement != null) statement.close();
-            DBConnection.closeConnection(conn);
         }
-        return user;
+        return null;
     }
 
-//    Add user to the database
-    public boolean addUser(@NotNull User user) throws SQLException{
-        boolean status = false;
-        PreparedStatement statement = null;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "INSERT INTO users(userName, password, role, email) VALUES (?, ?, ?, ?) ";
-            statement = conn.prepareStatement(sql);
-            statement.setString(1,user.getUserName());
-            statement.setString(2,user.getPassword());
-            statement.setString(3,user.getUserRole());
-            statement.setString(4,user.getEmail());
-            int rows = statement.executeUpdate();
-            status = rows>0;
-        }finally {
-            if (statement != null) statement.close();
-            DBConnection.closeConnection(conn);
+
+    public void addUser(User user) throws SQLException {
+        String sql = "INSERT INTO user(username, password, role) VALUES (?, ?, ?) ";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql);) {
+            statement.setString(1, user.getUsername());
+            statement.setString(2, user.getPassword());
+            statement.setString(3, user.getUserRole());
+            statement.executeUpdate();
         }
-        return status;
     }
 
 //    Get All users from DB
-    public List<User> getAllUsers() throws SQLException{
+    public List<User> getAllUsers() throws SQLException {
+        String sql = "SELECT * FROM user";
         List<User> users = new ArrayList<>();
-        Statement statement = null;
-        try{
-            conn =DBConnection.getConnection();
-            String sql = "SELECT * FROM users";
-            statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql);) {
 
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 User user = new User(
                         resultSet.getInt("userId"),
                         resultSet.getString("userName"),
                         resultSet.getString("password"),
-                        resultSet.getString("role"),
-                        resultSet.getString("email"));
+                        resultSet.getString("role"));
                 users.add(user);
             }
-        }finally {
-            if(statement != null) statement.close();
-            DBConnection.closeConnection(conn);
+            return users;
         }
-        return users;
     }
 
-//    Search user by userName
-    public int searchUser(String userName) throws SQLException{
-        int userId = -1;
-        PreparedStatement statement = null;
-        try{
-            conn =DBConnection.getConnection();
-            String sql = "SELECT userId FROM users WHERE userName = ?";
-            statement = conn.prepareStatement(sql);
-            statement.setString(1,userName);
+
+    public User getUserByUsername(String username) throws SQLException {
+        String sql = "SELECT * FROM user WHERE username = ?";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql);) {
+            statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
 
-            if(resultSet.next()){
-                userId = resultSet.getInt("userId");
+            if (resultSet.next()) {
+                User user = new User(
+                        resultSet.getInt("userId"),
+                        resultSet.getString("username"),
+                        resultSet.getString("userRole"));
+                return user;
             }
-        }finally {
-            if(statement != null) statement.close();
-            DBConnection.closeConnection(conn);
         }
-        return  userId;
+        return null;
     }
 
-//    Update user by userId
-    public boolean updateUser(User user) throws SQLException{
-        boolean status = false;
-        PreparedStatement statement = null;
-        try {
-            conn = DBConnection.getConnection();
-            String sql = "UPDATE users SET userName = ?, password = ?, role = ?, email = ? WHERE userId = ?";
-            statement = conn.prepareStatement(sql);
-            statement.setString(1, user.getUserName());
-            statement.setString(2,user.getPassword());
-            statement.setString(3,user.getUserRole());
-            statement.setString(4,user.getEmail());
-            statement.setInt(5,user.getUserId());
-            int rows = statement.executeUpdate();
-            status = rows>0;
-        }finally {
-            if(statement != null) statement.close();
-            DBConnection.closeConnection(conn);
+    public void updateUser(User user) throws SQLException {
+        String sql = "UPDATE user SET password = ?, role = ? WHERE userId = ?";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql);) {
+            statement.setString(1, user.getPassword());
+            statement.setString(2, user.getUserRole());
+            statement.setInt(3, user.getUserId());
+            statement.executeUpdate();
         }
-        return status;
     }
 
-//    Delete a user from DB
-    public boolean deleteUser(int userId) throws SQLException{
-        boolean status = false;
-        PreparedStatement statement = null;
-        try{
-            conn = DBConnection.getConnection();
-            String sql = "DELETE FROM users WHERE userId = ? ";
-            statement = conn.prepareStatement(sql);
-            statement.setInt(1,userId);
-            int rows =statement.executeUpdate();
-            status = rows>0;
-        }finally {
-            if(statement != null) statement.close();
-            DBConnection.closeConnection(conn);
+
+    public void deleteUser(int userId) throws SQLException {
+        String sql = "DELETE FROM user WHERE userId = ? ";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql);) {
+            statement.setInt(1, userId);
+            statement.executeUpdate();
         }
-        return status;
     }
 
 }

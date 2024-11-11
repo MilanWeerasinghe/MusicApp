@@ -9,8 +9,8 @@ import java.util.List;
 public class SongService {
     private SongDAO songDAO = new SongDAO();
 
-    public boolean addSong(Song song) throws SQLException {
-        return songDAO.addSong(song);
+    public void addSong(Song song) throws SQLException {
+        songDAO.addSong(song);
     }
 
     public List<Song> getAllSongs() throws SQLException{
@@ -20,12 +20,15 @@ public class SongService {
     public Song searchASongByTitle(String title) throws SQLException{
         return songDAO.searchASongByTitle(title);
     }
-
-    public boolean updateASong(Song song) throws SQLException{
-        return songDAO.updateASong(song);
+    public List<Song> searchASongByArtistId(int songId) throws SQLException{
+        return songDAO.searchASongByArtistId(songId);
     }
 
-    public boolean deleteASong(String title)throws SQLException{
-        return songDAO.deleteASong(title);
+    public void updateASong(Song song) throws SQLException{
+        songDAO.updateASong(song);
+    }
+
+    public void deleteASong(int id)throws SQLException{
+        songDAO.deleteASong(id);
     }
 }
