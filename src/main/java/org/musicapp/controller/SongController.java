@@ -1,7 +1,6 @@
 package org.musicapp.controller;
 
 import org.musicapp.model.Song;
-import org.musicapp.model.User;
 import org.musicapp.service.SongService;
 
 import java.sql.SQLException;
@@ -17,37 +16,33 @@ public class SongController {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            if (!userController.isAuthenticated())
-                userController.login();
-            else{
-                System.out.println("1. List Songs");
-                System.out.println("2. Get Song by Title");
-                System.out.println("3. Create Song");
-                System.out.println("4. Update Song Details");
-                System.out.println("5. Delete Song");
-                System.out.println("6. Exit");
-                System.out.print("Enter your choice: ");
-                int choice = scanner.nextInt();
+            System.out.println("1. List Songs");
+            System.out.println("2. Get Song by Title");
+            System.out.println("3. Create Song");
+            System.out.println("4. Update Song Details");
+            System.out.println("5. Delete Song");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
 
-                switch (choice) {
-                    case 1:
-                        listAllSongs();
-                        break;
-                    case 2:
-                        searchSongByTitle(scanner);
-                        break;
-                    case 3:
-                        if (userController.isAdmin()) addSong(scanner);
-                        break;
-                    case 4:
-                        if (userController.isAdmin()) updateSong(scanner);
-                        break;
-                    case 5:
-                        if (userController.isAdmin()) deleteASong(scanner);
-                        break;
-                    case 6:
-                        return;
-                }
+            switch (choice) {
+                case 1:
+                    listAllSongs();
+                    break;
+                case 2:
+                    searchSongByTitle(scanner);
+                    break;
+                case 3:
+                    if (userController.isAdmin()) addSong(scanner);
+                    break;
+                case 4:
+                    if (userController.isAdmin()) updateSong(scanner);
+                    break;
+                case 5:
+                    if (userController.isAdmin()) deleteASong(scanner);
+                    break;
+                case 6:
+                    return;
             }
         }
     }
