@@ -1,16 +1,16 @@
 package org.musicapp;
 
-import org.musicapp.controller.AlbumController;
-import org.musicapp.controller.ArtistController;
-import org.musicapp.controller.SongController;
-import org.musicapp.controller.UserController;
+import org.musicapp.controller.AlbumManage;
+import org.musicapp.controller.ArtistManage;
+import org.musicapp.controller.SongManage;
+import org.musicapp.controller.UserManage;
 import org.musicapp.util.UserAuth;
 
 import java.sql.SQLException;
 import java.util.Scanner;
 
 public class ArtistManagementApp {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
         UserAuth userAuth = new UserAuth();
 
@@ -24,19 +24,19 @@ public class ArtistManagementApp {
 
                     switch (choice){
                         case 1:
-                            SongController songController = new SongController();
+                            SongManage songController = new SongManage();
                             songController.manageSongs();
                             break;
                         case 2:
-                            ArtistController artist = new ArtistController();
+                            ArtistManage artist = new ArtistManage();
                             artist.manageArtist();
                             break;
                         case 3:
-                            AlbumController manageAlbum = new AlbumController();
+                            AlbumManage manageAlbum = new AlbumManage();
                             manageAlbum.manageAlbums();
                             break;
                         case 4:
-                            UserController userController = new UserController();
+                            UserManage userController = new UserManage();
                             userController.manageUsers();
                             break;
                         case 5:

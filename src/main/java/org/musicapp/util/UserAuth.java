@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class UserAuth {
-    private static User currentUser;
+    private static String currentUserRole;
     private UserService userService = new UserService();
 
     public boolean login(){
@@ -20,28 +20,21 @@ public class UserAuth {
         String password = scanner.nextLine();
 
         try{
-            currentUser =  userService.userAuthenticate(new User(userName, password));
-            if (currentUser != null) {
-                System.out.println("Login Successful... Welcome " + currentUser.getUsername());
+            currentUserRole = userService.userAuthenticate(new User(userName, password));
+                System.out.println("Login as "+ currentUserRole + "\nWelcome " + userName);
                 System.out.println("----------------------------------------");
                 status = true;
-            }
-            else
-                System.out.println("Login Unsuccessful");
-        }catch (SQLException e){
-            e.printStackTrace();
+        }catch (Exception e){
+            ExceptionHandling.printError(e.getMessage());
         }
         return status;
 
     }
     public boolean isAdmin(){
-        boolean status = currentUser != null && currentUser.getUserRole().equals("admin");
+        boolean status = currentUserRole.equals("Admin");
         if (!status)
             System.out.println("Access denied..");
         return status;
-    }
-    public boolean isAuthenticated(){
-        return currentUser != null;
     }
 
 }
