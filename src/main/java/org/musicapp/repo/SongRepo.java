@@ -1,4 +1,4 @@
-package org.musicapp.dao;
+package org.musicapp.repo;
 import org.musicapp.model.Song;
 import org.musicapp.util.DBConnection;
 
@@ -6,12 +6,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SongDAO {
+public class SongRepo {
 
 //    Add a Song to the Database
     public void addSong(Song song) throws SQLException {
         String sql = "INSERT INTO song(songTitle, duration, albumId, artistId) VALUES(?, ?, ?, ?) ";
-        try (Connection connection = DBConnection.getInstance().getConnection();
+        try (Connection connection = DBConnection.getInstance();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, song.getSongTitle());
             preparedStatement.setString(2, song.getDuration());
@@ -26,7 +26,7 @@ public class SongDAO {
         List<Song> songs = new ArrayList<>();
 
         String sql = "SELECT * FROM song";
-        try (Connection connection = DBConnection.getInstance().getConnection();
+        try (Connection connection = DBConnection.getInstance();
             Statement statement=connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql)){
 
@@ -46,7 +46,7 @@ public class SongDAO {
 //    Get a Song By Title
     public Song searchASongByTitle(String title) throws SQLException{
         String sql = "SELECT * FROM song WHERE songTitle = ?";
-        try(Connection connection = DBConnection.getInstance().getConnection();
+        try(Connection connection = DBConnection.getInstance();
             PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setString(1,title);
             ResultSet resultSet = statement.executeQuery();
@@ -67,7 +67,7 @@ public class SongDAO {
     public List<Song> searchASongByArtistId(int artistId) throws SQLException{
         List<Song> songList = new ArrayList<>();
         String sql = "SELECT * FROM Song WHERE artistId = ?";
-        try (Connection connection = DBConnection.getInstance().getConnection();
+        try (Connection connection = DBConnection.getInstance();
              PreparedStatement statement = connection.prepareStatement(sql)){
              statement.setInt(1, artistId);
              ResultSet resultSet = statement.executeQuery();
@@ -88,7 +88,7 @@ public class SongDAO {
 //    Update a Song Details in Database
     public void updateASong(Song song) throws SQLException{
         String sql = "UPDATE song SET songTitle= ?, duration = ? WHERE songId= ? ";
-        try(Connection connection = DBConnection.getInstance().getConnection();
+        try(Connection connection = DBConnection.getInstance();
             PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setString(1, song.getSongTitle());
             statement.setString(2,song.getDuration());
@@ -98,11 +98,11 @@ public class SongDAO {
     }
 
 //    Delete a Song From Database
-    public void deleteASong(int sondId) throws SQLException{
-        String sql = "DELETE FROM song WHERE songId = ? ";
-        try(Connection connection = DBConnection.getInstance().getConnection();
+    public void deleteASong(String title) throws SQLException{
+        String sql = "DELETE FROM song WHERE songTitle = ? ";
+        try(Connection connection = DBConnection.getInstance();
             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, sondId);
+            preparedStatement.setString(1, title);
             preparedStatement.executeUpdate();
         }
     }

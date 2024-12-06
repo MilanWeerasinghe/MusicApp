@@ -1,22 +1,19 @@
-package org.musicapp.dao;
+package org.musicapp.repo;
 
-import org.musicapp.model.Song;
 import org.musicapp.util.DBConnection;
 import org.musicapp.model.Artist;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class ArtistDAO {
+public class ArtistRepo {
 
     public List<Artist> getArtistList() throws SQLException{
         List<Artist> artistList = new ArrayList<>();
         String sql = "SELECT * FROM artist";
 
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        try (Connection conn = DBConnection.getInstance();
              Statement statement = conn.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)){
 
@@ -38,7 +35,7 @@ public class ArtistDAO {
     public Artist getArtist(int id) throws SQLException{
         String sql = "SELECT * from artist WHERE artistId = ? ";
 
-        try(Connection conn = DBConnection.getInstance().getConnection();
+        try(Connection conn = DBConnection.getInstance();
             PreparedStatement statement = conn.prepareStatement(sql)){
 
             statement.setInt(1,id);
@@ -58,7 +55,7 @@ public class ArtistDAO {
 
     public void addArtist(Artist artist) throws SQLException {
         String sql = "insert into artist(fName, lName, age) values(?, ?, ?) ";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
 
             preparedStatement.setString(1, artist.getArtistFName());
@@ -70,7 +67,7 @@ public class ArtistDAO {
 
     public void removeArtist(int artistId) throws SQLException {
         String sql = "DELETE FROM artist WHERE artistId = ?";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement statement = conn.prepareStatement(sql)) {
 
             statement.setInt(1, artistId);
@@ -80,7 +77,7 @@ public class ArtistDAO {
 
     public void updateArtist(Artist artist) throws SQLException {
         String sql = "UPDATE artist SET fName = ? ,lName = ? ,age=? WHERE artistId = ?";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement statement = conn.prepareStatement(sql)) {
 
             statement.setString(1, artist.getArtistFName());

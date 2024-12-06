@@ -1,6 +1,5 @@
-package org.musicapp.dao;
+package org.musicapp.repo;
 
-import org.jetbrains.annotations.NotNull;
 import org.musicapp.model.User;
 import org.musicapp.util.DBConnection;
 
@@ -8,23 +7,18 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDAO {
+public class UserRepo {
 
-    public User userAuthenticate(User user) throws SQLException{
-        String sql = "SELECT * FROM user WHERE userName= ? AND password= ? ";
-        try( Connection conn = DBConnection.getInstance().getConnection();
+    public String userAuthenticate(User user) throws SQLException{
+        String sql = "SELECT userRole FROM user WHERE userName= ? AND password= ? ";
+        try( Connection conn = DBConnection.getInstance();
             PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                User newUser = new User(
-                        resultSet.getInt("userId"),
-                        resultSet.getString("username"),
-                        resultSet.getString("userRole"));
-
-                return newUser;
+                return resultSet.getString("userRole");
             }
         }
         return null;
@@ -32,8 +26,8 @@ public class UserDAO {
 
 
     public void addUser(User user) throws SQLException {
-        String sql = "INSERT INTO user(username, password, role) VALUES (?, ?, ?) ";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        String sql = "INSERT INTO user(username, password, userRole) VALUES (?, ?, ?) ";
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement statement = conn.prepareStatement(sql);) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
@@ -46,7 +40,7 @@ public class UserDAO {
     public List<User> getAllUsers() throws SQLException {
         String sql = "SELECT * FROM user";
         List<User> users = new ArrayList<>();
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        try (Connection conn = DBConnection.getInstance();
              Statement statement = conn.createStatement();
              ResultSet resultSet = statement.executeQuery(sql);) {
 
@@ -55,7 +49,7 @@ public class UserDAO {
                         resultSet.getInt("userId"),
                         resultSet.getString("userName"),
                         resultSet.getString("password"),
-                        resultSet.getString("role"));
+                        resultSet.getString("userRole"));
                 users.add(user);
             }
             return users;
@@ -65,7 +59,7 @@ public class UserDAO {
 
     public User getUserByUsername(String username) throws SQLException {
         String sql = "SELECT * FROM user WHERE username = ?";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement statement = conn.prepareStatement(sql);) {
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
@@ -82,8 +76,8 @@ public class UserDAO {
     }
 
     public void updateUser(User user) throws SQLException {
-        String sql = "UPDATE user SET password = ?, role = ? WHERE userId = ?";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+        String sql = "UPDATE user SET password = ?, userRole = ? WHERE userId = ?";
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement statement = conn.prepareStatement(sql);) {
             statement.setString(1, user.getPassword());
             statement.setString(2, user.getUserRole());
@@ -93,11 +87,11 @@ public class UserDAO {
     }
 
 
-    public void deleteUser(int userId) throws SQLException {
-        String sql = "DELETE FROM user WHERE userId = ? ";
-        try (Connection conn = DBConnection.getInstance().getConnection();
+    public void deleteUser(String username) throws SQLException {
+        String sql = "DELETE FROM user WHERE username = ? ";
+        try (Connection conn = DBConnection.getInstance();
              PreparedStatement statement = conn.prepareStatement(sql);) {
-            statement.setInt(1, userId);
+            statement.setString(1, username);
             statement.executeUpdate();
         }
     }
